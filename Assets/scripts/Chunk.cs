@@ -43,18 +43,40 @@ public class Chunk : MonoBehaviour
             {
                 for (int y = 0; y < World.Instance.chunkHeight; y++)
                 {
-                    if (map[x,y,z] == 0)
+                    if (map[x, y, z] == 0)
                     {
                         continue;
                     }
-                    BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, triangles);
-                    BuildFaces(map[x, y, z], new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, triangles);
-
-                    BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, triangles);
-                    BuildFaces(map[x, y, z], new Vector3(x, y+1, z), Vector3.forward, Vector3.right, true, verts, uvs, triangles);
-
-                    BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, triangles);
-                    BuildFaces(map[x, y, z], new Vector3(x, y, z+1), Vector3.up, Vector3.right, false, verts, uvs, triangles);
+                    //left
+                    if (isTransparent(x - 1, y, z))
+                    {
+                        BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, triangles);
+                    }
+                    //right
+                    if (isTransparent(x + 1, y, z))
+                    {
+                        BuildFaces(map[x, y, z], new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, triangles);
+                    }
+                    //bottom
+                    if (isTransparent(x, y-1, z))
+                    {
+                        BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, triangles);
+                    }
+                    //up
+                    if (isTransparent(x , y+1, z))
+                    {
+                        BuildFaces(map[x, y, z], new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, triangles);
+                    }
+                    //back
+                    if (isTransparent(x , y, z-1))
+                    {
+                        BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, triangles);
+                    }
+                    //front
+                    if (isTransparent(x , y, z+1))
+                    {
+                        BuildFaces(map[x, y, z], new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, triangles);
+                    }
                 }
             }
         }
@@ -66,6 +88,27 @@ public class Chunk : MonoBehaviour
         mesh.RecalculateNormals();
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
+    }
+
+    protected bool isTransparent(int x, int y, int z) {
+        byte brick = GetByte(x, y, z);
+        switch (brick)
+        {
+            case 0:
+                return true;
+            case 1:
+                return false;
+        }
+        return false;
+    }
+
+    protected virtual byte GetByte(int x,int y,int z)
+    {
+        if (x<0 ||y<0||z<0 || x>=World.Instance.chunkWidth||y >= World.Instance.chunkHeight || z >= World.Instance.chunkWidth)
+        {
+            return 0;
+        }
+        return map[x, y, z];
     }
 
     public virtual void BuildFaces(byte brick, Vector3 corner,Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> triangles)
