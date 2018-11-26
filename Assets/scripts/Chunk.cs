@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SimplexNoise;
 
 [RequireComponent(typeof(Mesh))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -21,10 +22,19 @@ public class Chunk : MonoBehaviour
         map = new byte[World.Instance.chunkWidth,  World.Instance.chunkHeight,World.Instance.chunkWidth];
         for (int x = 0; x < World.Instance.chunkWidth; x++)
         {
-            for (int z = 0; z < World.Instance.chunkWidth; z++)
+            float noiseX = (float)x / World.Instance.chunkWidth;
+            for (int y = 0; y < World.Instance.chunkWidth; y++)
             {
-                map[x, 0, z] = 1;
-                map[x, 1, z] = (byte)Random.Range(0, 2) ;
+                float noiseY = (float)y / World.Instance.chunkHeight;
+                for (int z = 0; z < World.Instance.chunkWidth; z++)
+                {
+                    float noiseZ = (float)z / World.Instance.chunkWidth;
+                    float noise = Noise.Generate(noiseX,noiseY,noiseZ);
+                    if (noise > 0.2f)
+                    {
+                        map[x, y, z] = 1;
+                    }
+                }
             }
         }
         CreateVisualMesh();
