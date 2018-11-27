@@ -66,31 +66,37 @@ public class Chunk : MonoBehaviour
                     //left
                     if (isTransparent(x - 1, y, z))
                     {
+                        //use up and forward, draw another face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, triangles);
                     }
                     //right
                     if (isTransparent(x + 1, y, z))
                     {
+                        //use up and forward, draw this face
                         BuildFaces(map[x, y, z], new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, triangles);
                     }
                     //bottom
                     if (isTransparent(x, y-1, z))
                     {
+                        //use forward and right, draw another face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, triangles);
                     }
                     //up
                     if (isTransparent(x , y+1, z))
                     {
+                        //use forward and right, draw this face
                         BuildFaces(map[x, y, z], new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, triangles);
                     }
-                    //back
+                    //front
                     if (isTransparent(x , y, z-1))
                     {
+                        //use up and right, draw this face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, triangles);
                     }
-                    //front
+                    //back
                     if (isTransparent(x , y, z+1))
                     {
+                        //use up and right, draw another face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, triangles);
                     }
                 }
@@ -130,7 +136,10 @@ public class Chunk : MonoBehaviour
     public virtual void BuildFaces(byte brick, Vector3 corner,Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> triangles)
     {
         int index = verts.Count;
-        //because triangles go in clockwise
+        //because triangles go in clockwise, otherwise it is invisible
+        //  1 - 2
+        //  |   |
+        //  0 - 3
         verts.Add(corner);
         verts.Add(corner + up);
         verts.Add(corner + up + right);
@@ -141,6 +150,7 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(1, 1));
         uvs.Add(new Vector2(1, 0));
 
+        //reversed = false means we want to draw it counter clock
         if (reversed) {
             triangles.Add(index + 0);
             triangles.Add(index + 1);
