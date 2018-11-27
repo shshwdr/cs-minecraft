@@ -29,7 +29,13 @@ public class Chunk : MonoBehaviour
                 for (int z = 0; z < World.Instance.chunkWidth; z++)
                 {
                     float noiseZ = (float)z / World.Instance.chunkWidth;
+                    //value passed in generate should be float between 0 and 1
+                    //value output is between -1 to 1
                     float noise = Noise.Generate(noiseX,noiseY,noiseZ);
+                    float halfHeightFloat = World.Instance.chunkHeight / 2f;
+                    //y smaller means height is smaller
+                    //this makes ground solid and don't have mesh on sky
+                    noise += (halfHeightFloat - (float)y) / halfHeightFloat;
                     if (noise > 0.2f)
                     {
                         map[x, y, z] = 1;
