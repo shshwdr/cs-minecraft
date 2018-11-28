@@ -30,18 +30,23 @@ public class Chunk : MonoBehaviour
         meshCollider = GetComponent<MeshCollider>();
         meshFilter = GetComponent<MeshFilter>();
         map = new byte[width, height, width];
+        
+        Random.InitState(World.Instance.seed);
+        Vector3 offset = new Vector3(Random.value* 10000, Random.value * 10000, Random.value * 10000);
+
         for (int x = 0; x < width; x++)
         {
-            float noiseX = (float)x / width;
+            float noiseX = Mathf.Abs((float)x+ offset.x+ transform.position.x) / width;
             for (int y = 0; y < height; y++)
             {
-                float noiseY = (float)y / height;
+                float noiseY = Mathf.Abs((float)y + offset.y + transform.position.y) / height;
                 for (int z = 0; z < width; z++)
                 {
-                    float noiseZ = (float)z / width;
+                    float noiseZ = Mathf.Abs((float)z + offset.z + transform.position.z) / width;
                     //value passed in generate should be float between 0 and 1
                     //value output is between -1 to 1
                     float noise = Noise.Generate(noiseX,noiseY,noiseZ);
+                    //Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
                     float halfHeightFloat = width / 2f;
                     //y smaller means height is smaller
                     //this makes ground solid and don't have mesh on sky
