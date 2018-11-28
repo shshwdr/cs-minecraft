@@ -53,10 +53,10 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
-        CreateVisualMesh();
+        StartCoroutine(CreateVisualMesh());
     }
 
-    public virtual void CreateVisualMesh()
+    public virtual IEnumerator CreateVisualMesh()
     {
         mesh = new Mesh();
         List<Vector3> verts = new List<Vector3>();
@@ -120,6 +120,7 @@ public class Chunk : MonoBehaviour
         mesh.RecalculateNormals();
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
+        yield return 0;
     }
 
     protected bool isTransparent(int x, int y, int z) {
