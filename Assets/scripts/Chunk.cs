@@ -8,6 +8,15 @@ using SimplexNoise;
 [RequireComponent(typeof(MeshCollider))]
 public class Chunk : MonoBehaviour
 {
+    public static List<Chunk> chunks = new List<Chunk>();
+    public static int width
+    {
+        get { return World.Instance.chunkWidth; }
+    }
+    public static int height
+    {
+        get { return World.Instance.chunkHeight; }
+    }
     public byte[,,] map;
     public Mesh mesh;
     protected MeshRenderer meshRenderer;
@@ -16,23 +25,24 @@ public class Chunk : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        chunks.Add(this);
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
         meshFilter = GetComponent<MeshFilter>();
-        map = new byte[World.Instance.chunkWidth,  World.Instance.chunkHeight,World.Instance.chunkWidth];
-        for (int x = 0; x < World.Instance.chunkWidth; x++)
+        map = new byte[width, height, width];
+        for (int x = 0; x < width; x++)
         {
-            float noiseX = (float)x / World.Instance.chunkWidth;
-            for (int y = 0; y < World.Instance.chunkWidth; y++)
+            float noiseX = (float)x / width;
+            for (int y = 0; y < height; y++)
             {
-                float noiseY = (float)y / World.Instance.chunkHeight;
-                for (int z = 0; z < World.Instance.chunkWidth; z++)
+                float noiseY = (float)y / height;
+                for (int z = 0; z < width; z++)
                 {
-                    float noiseZ = (float)z / World.Instance.chunkWidth;
+                    float noiseZ = (float)z / width;
                     //value passed in generate should be float between 0 and 1
                     //value output is between -1 to 1
                     float noise = Noise.Generate(noiseX,noiseY,noiseZ);
-                    float halfHeightFloat = World.Instance.chunkHeight / 2f;
+                    float halfHeightFloat = width / 2f;
                     //y smaller means height is smaller
                     //this makes ground solid and don't have mesh on sky
                     noise += (halfHeightFloat - (float)y) / halfHeightFloat;
@@ -53,11 +63,11 @@ public class Chunk : MonoBehaviour
         List<Vector2> uvs = new List<Vector2>();
         List<int> triangles = new List<int>();
 
-        for (int x = 0; x < World.Instance.chunkWidth; x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int z = 0; z < World.Instance.chunkWidth; z++)
+            for (int z = 0; z < width; z++)
             {
-                for (int y = 0; y < World.Instance.chunkHeight; y++)
+                for (int y = 0; y < height; y++)
                 {
                     if (map[x, y, z] == 0)
                     {
@@ -126,7 +136,7 @@ public class Chunk : MonoBehaviour
 
     protected virtual byte GetByte(int x,int y,int z)
     {
-        if (x<0 ||y<0||z<0 || x>=World.Instance.chunkWidth||y >= World.Instance.chunkHeight || z >= World.Instance.chunkWidth)
+        if (x<0 ||y<0||z<0 || x>=width||y >= height || z >= width)
         {
             return 0;
         }
@@ -175,5 +185,26 @@ public class Chunk : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public static Chunk FindChunk(Vector3 pos)
+    {
+        for(int i = 0; i < chunks.Count; i++)
+        {
+            Vector3 chunkPos = chunks[i].transform.position;
+            if (pos.x < chunkPos.x || pos.z < chunkPos.z ||
+                //take care this place need to be >= instead of >, 
+                //otherwise a chunk on this position will think as already existed, 
+                //and cause some chunks missing in world
+                pos.x >= chunkPos.x + width ||  pos.z >= chunkPos.z + width
+               // || pos.y >= chunkPos.y + height || pos.y < chunkPos.y 
+                )
+            {
+                continue;
+            }
+            return chunks[i];
+        }
+
+        return null;
     }
 }
