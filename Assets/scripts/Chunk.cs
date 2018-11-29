@@ -161,10 +161,15 @@ public class Chunk : MonoBehaviour
         verts.Add(corner + up + right);
         verts.Add(corner + right);
 
-        uvs.Add(new Vector2(0, 0));
-        uvs.Add(new Vector2(0, 1));
-        uvs.Add(new Vector2(1, 1));
-        uvs.Add(new Vector2(1, 0));
+        //Vector2 uvWidth = new Vector2(0.25f, 0.25f);
+        //Vector2 uvCorner = new Vector2(0f, 0.75f);
+        //this is a nasty fix for bump map does not have smooth edge and caused a horrible line for each cube
+        Vector2 uvWidth = new Vector2(0.19f, 0.19f);
+        Vector2 uvCorner = new Vector2(0.03f, 0.78f);
+        uvs.Add(uvCorner);
+        uvs.Add(new Vector2(uvCorner.x, uvCorner.y + uvWidth.y));
+        uvs.Add(new Vector2(uvCorner.x+uvWidth.x, uvCorner.y + uvWidth.y));
+        uvs.Add(new Vector2(uvCorner.x + uvWidth.x, uvCorner.y));
 
         //reversed = false means we want to draw it counter clock
         if (reversed) {
