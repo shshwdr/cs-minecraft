@@ -39,6 +39,9 @@ public class Chunk : MonoBehaviour
 
         Random.InitState(World.Instance.seed);
         Vector3 offset0 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+        Vector3 offset1 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+        Vector3 offset2 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+
 
         for (int x = 0; x < width; x++)
         {
@@ -46,12 +49,21 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < width; z++)
                 {
+                    //large scale means more steep, less fluent, 
+                    //so we should make the value less important, because we want it overall to be fluent
+                    //this is to add more detail to the map generated with scalel 0.007
+                    //but without the map generated with scale 0.007, this will just be blobs of small island
                     float noise = CalculateNoise(new Vector3(x, y, z), offset0, 0.05f);
+                    //this means on ground this value are more prone to have value(because noise is larger when y is smaller)
+                    noise /= ((float)y/5.0f);
+                    noise = Mathf.Max(noise, CalculateNoise(new Vector3(x, y, z), offset1, 0.02f));
+                    noise /= ((float)y / 5.0f);
+                    noise = Mathf.Max(noise, CalculateNoise(new Vector3(x, y, z), offset2, 0.007f));
                     //Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
-                    float halfHeightFloat = width / 2f;
+                    //float halfHeightFloat = width / 2f;
                     //y smaller means height is smaller
                     //this makes ground solid and don't have mesh on sky
-                    noise += (halfHeightFloat - (float)y) / halfHeightFloat;
+                    //noise += (halfHeightFloat - (float)y) / halfHeightFloat;
                     if (noise > 0.2f)
                     {
                         map[x, y, z] = 1;
@@ -63,10 +75,10 @@ public class Chunk : MonoBehaviour
 
     public virtual float CalculateNoise(Vector3 pos, Vector3 offset, float scale)
     {
-        float noiseX = Mathf.Abs((float)pos.x + offset.x + transform.position.x) *scale;
+        float noiseX = Mathf.Abs((float)pos.x + offset.x + transform.position.x) * scale;
         float noiseY = Mathf.Abs((float)pos.y + offset.y + transform.position.y) * scale;
         float noiseZ = Mathf.Abs((float)pos.z + offset.z + transform.position.z) * scale;
-        //value passed in generate should be float between 0 and 1
+        //value passed in generate should not be integer
         //value output is between -1 to 1
         return Noise.Generate(noiseX, noiseY, noiseZ);
     }
