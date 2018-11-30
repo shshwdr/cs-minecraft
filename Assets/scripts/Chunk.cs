@@ -29,23 +29,24 @@ public class Chunk : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
         meshFilter = GetComponent<MeshFilter>();
+        CalculateMap();
+        StartCoroutine(CreateVisualMesh());
+    }
+
+    public virtual void CalculateMap()
+    {
         map = new byte[width, height, width];
-        
+
         Random.InitState(World.Instance.seed);
-        Vector3 offset = new Vector3(Random.value* 10000, Random.value * 10000, Random.value * 10000);
+        Vector3 offset0 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
 
         for (int x = 0; x < width; x++)
         {
-            float noiseX = Mathf.Abs((float)x+ offset.x+ transform.position.x) / width;
             for (int y = 0; y < height; y++)
             {
-                float noiseY = Mathf.Abs((float)y + offset.y + transform.position.y) / height;
                 for (int z = 0; z < width; z++)
                 {
-                    float noiseZ = Mathf.Abs((float)z + offset.z + transform.position.z) / width;
-                    //value passed in generate should be float between 0 and 1
-                    //value output is between -1 to 1
-                    float noise = Noise.Generate(noiseX,noiseY,noiseZ);
+                    float noise = CalculateNoise(new Vector3(x, y, z), offset0, 0.05f);
                     //Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
                     float halfHeightFloat = width / 2f;
                     //y smaller means height is smaller
@@ -58,7 +59,16 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
-        StartCoroutine(CreateVisualMesh());
+    }
+
+    public virtual float CalculateNoise(Vector3 pos, Vector3 offset, float scale)
+    {
+        float noiseX = Mathf.Abs((float)pos.x + offset.x + transform.position.x) *scale;
+        float noiseY = Mathf.Abs((float)pos.y + offset.y + transform.position.y) * scale;
+        float noiseZ = Mathf.Abs((float)pos.z + offset.z + transform.position.z) * scale;
+        //value passed in generate should be float between 0 and 1
+        //value output is between -1 to 1
+        return Noise.Generate(noiseX, noiseY, noiseZ);
     }
 
     public virtual IEnumerator CreateVisualMesh()
