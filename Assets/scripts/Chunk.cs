@@ -51,13 +51,24 @@ public class Chunk : MonoBehaviour
         float mountainHeight = maxHeight-heightBase;
         //Debug.Log(height+" "+ heightBase+" "+ maxHeight+" "+mountainHeight);
         float mountainValue = CalculateNoise(worldPos, offset0, 0.009f);
-
+        float smallMountainValue = CalculateNoise(worldPos, offset2, 0.05f);
+        float clusterValue = CalculateNoise(worldPos, offset1, 0.02f);
+        if (mountainValue ==0f && smallMountainValue < 0.2f) 
+        {
+            //ground
+            brick = 3;
+        }else if(clusterValue > 0.9f){
+            brick = 4;
+        }else if (clusterValue > 0.8f)
+        {
+            brick = 2;
+        }
         mountainValue *= mountainHeight;
+        
         mountainValue += heightBase;
 
         //mountainValue += CalculateNoise(worldPos, offset1, 0.02f) * 5 - 5;
-        mountainValue += CalculateNoise(worldPos, offset2, 0.05f) * 10 - 5;
-
+        mountainValue += smallMountainValue * 10 - 5;
         ////large scale means more steep, less fluent, 
         ////so we should make the value less important, because we want it overall to be fluent
         ////this is to add more detail to the map generated with scalel 0.007
@@ -77,7 +88,6 @@ public class Chunk : MonoBehaviour
         //{
         //    return brick;
         //}
-
         if (mountainValue >= worldPos.y)
         {
             return brick;
@@ -115,7 +125,7 @@ public class Chunk : MonoBehaviour
         float noiseZ = Mathf.Abs((float)pos.z + offset.z) * scale;
         //value passed in generate should not be integer
         //value output is between -1 to 1
-        return 0.5f+Noise.Generate(noiseX, noiseY, noiseZ)*0.5f;
+        return Mathf.Max(0,Noise.Generate(noiseX, noiseY, noiseZ));
     }
 
     public virtual IEnumerator CreateVisualMesh()
@@ -193,10 +203,9 @@ public class Chunk : MonoBehaviour
         {
             case 0:
                 return true;
-            case 1:
+            default:
                 return false;
         }
-        return false;
     }
 
     protected virtual byte GetByte(Vector3 worldPos)
@@ -244,11 +253,9 @@ public class Chunk : MonoBehaviour
         verts.Add(corner + up + right);
         verts.Add(corner + right);
 
-        //Vector2 uvWidth = new Vector2(0.25f, 0.25f);
-        //Vector2 uvCorner = new Vector2(0f, 0.75f);
-        //this is a nasty fix for bump map does not have smooth edge and caused a horrible line for each cube
-        Vector2 uvWidth = new Vector2(0.19f, 0.19f);
-        Vector2 uvCorner = new Vector2(0.03f, 0.78f);
+        Vector2 uvWidth = new Vector2(0.25f, 0.25f);
+
+        Vector2 uvCorner = new Vector2(0f+(brick-1)*0.25f, 0.75f);
         uvs.Add(uvCorner);
         uvs.Add(new Vector2(uvCorner.x, uvCorner.y + uvWidth.y));
         uvs.Add(new Vector2(uvCorner.x+uvWidth.x, uvCorner.y + uvWidth.y));
