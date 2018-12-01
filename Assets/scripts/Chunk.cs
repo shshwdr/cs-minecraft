@@ -151,6 +151,8 @@ public class Chunk : MonoBehaviour
     }
 
     protected bool isTransparent(int x, int y, int z) {
+        //dont draw the bottom
+        if (y < 0) { return false; }
         byte brick = GetByte(x, y, z);
         switch (brick)
         {
