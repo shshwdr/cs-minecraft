@@ -9,6 +9,7 @@ public class World : Singleton<World>
     public int seed = 0;
     public Chunk chunkPrefab;
     public float viewRange = 30;
+    public float brickHeight = 0.5f;
     // Start is called before the first frame update
     void Awake()
     {

@@ -17,6 +17,10 @@ public class Chunk : MonoBehaviour
     {
         get { return World.Instance.chunkHeight; }
     }
+    public static float brickHeight
+    {
+        get { return World.Instance.brickHeight; }
+    }
     public byte[,,] map;
     public Mesh mesh;
     protected MeshRenderer meshRenderer;
@@ -244,6 +248,11 @@ public class Chunk : MonoBehaviour
     public virtual void BuildFaces(byte brick, Vector3 corner,Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> triangles)
     {
         int index = verts.Count;
+
+        corner.y *= brickHeight;
+        up.y *= brickHeight;
+        right.y *= brickHeight;
+
         //because triangles go in clockwise, otherwise it is invisible
         //  1 - 2
         //  |   |
