@@ -33,6 +33,40 @@ public class Chunk : MonoBehaviour
         StartCoroutine(CreateVisualMesh());
     }
 
+    public static byte GetTheoreticalByte(Vector3 worldPos)
+    {
+        Random.InitState(World.Instance.seed);
+        Vector3 offset0 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+        Vector3 offset1 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+        Vector3 offset2 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
+        return CalculteByte(worldPos, offset0, offset1, offset2);
+    }
+
+    public static byte CalculteByte(Vector3 worldPos, Vector3 offset0, Vector3 offset1, Vector3 offset2)
+    {
+        byte brick = 1;
+        //large scale means more steep, less fluent, 
+        //so we should make the value less important, because we want it overall to be fluent
+        //this is to add more detail to the map generated with scalel 0.007
+        //but without the map generated with scale 0.007, this will just be blobs of small island
+        float noise = CalculateNoise(worldPos, offset0, 0.05f);
+        //this means on ground this value are more prone to have value(because noise is larger when y is smaller)
+        noise /= ((float)worldPos.y / 5.0f);
+        noise = Mathf.Max(noise, CalculateNoise(worldPos, offset1, 0.02f));
+        noise /= ((float)worldPos.y / 5.0f);
+        noise = Mathf.Max(noise, CalculateNoise(worldPos, offset2, 0.007f));
+        //Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
+        //float halfHeightFloat = width / 2f;
+        //y smaller means height is smaller
+        //this makes ground solid and don't have mesh on sky
+        //noise += (halfHeightFloat - (float)y) / halfHeightFloat;
+        if (noise > 0.2f)
+        {
+            return brick;
+        }
+        return 0;
+    }
+
     public virtual void CalculateMap()
     {
         map = new byte[width, height, width];
@@ -49,35 +83,18 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < width; z++)
                 {
-                    //large scale means more steep, less fluent, 
-                    //so we should make the value less important, because we want it overall to be fluent
-                    //this is to add more detail to the map generated with scalel 0.007
-                    //but without the map generated with scale 0.007, this will just be blobs of small island
-                    float noise = CalculateNoise(new Vector3(x, y, z), offset0, 0.05f);
-                    //this means on ground this value are more prone to have value(because noise is larger when y is smaller)
-                    noise /= ((float)y/5.0f);
-                    noise = Mathf.Max(noise, CalculateNoise(new Vector3(x, y, z), offset1, 0.02f));
-                    noise /= ((float)y / 5.0f);
-                    noise = Mathf.Max(noise, CalculateNoise(new Vector3(x, y, z), offset2, 0.007f));
-                    //Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
-                    //float halfHeightFloat = width / 2f;
-                    //y smaller means height is smaller
-                    //this makes ground solid and don't have mesh on sky
-                    //noise += (halfHeightFloat - (float)y) / halfHeightFloat;
-                    if (noise > 0.2f)
-                    {
-                        map[x, y, z] = 1;
-                    }
+
+                    map[x, y, z] = CalculteByte(new Vector3(x, y, z)+transform.position, offset0, offset1, offset2);
                 }
             }
         }
     }
 
-    public virtual float CalculateNoise(Vector3 pos, Vector3 offset, float scale)
+    public static float CalculateNoise(Vector3 pos, Vector3 offset, float scale)
     {
-        float noiseX = Mathf.Abs((float)pos.x + offset.x + transform.position.x) * scale;
-        float noiseY = Mathf.Abs((float)pos.y + offset.y + transform.position.y) * scale;
-        float noiseZ = Mathf.Abs((float)pos.z + offset.z + transform.position.z) * scale;
+        float noiseX = Mathf.Abs((float)pos.x + offset.x) * scale;
+        float noiseY = Mathf.Abs((float)pos.y + offset.y) * scale;
+        float noiseZ = Mathf.Abs((float)pos.z + offset.z) * scale;
         //value passed in generate should not be integer
         //value output is between -1 to 1
         return Noise.Generate(noiseX, noiseY, noiseZ);
@@ -113,25 +130,25 @@ public class Chunk : MonoBehaviour
                         BuildFaces(map[x, y, z], new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, triangles);
                     }
                     //bottom
-                    if (isTransparent(x, y-1, z))
+                    if (isTransparent(x, y - 1, z))
                     {
                         //use forward and right, draw another face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, triangles);
                     }
                     //up
-                    if (isTransparent(x , y+1, z))
+                    if (isTransparent(x, y + 1, z))
                     {
                         //use forward and right, draw this face
                         BuildFaces(map[x, y, z], new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, triangles);
                     }
                     //front
-                    if (isTransparent(x , y, z-1))
+                    if (isTransparent(x, y, z - 1))
                     {
                         //use up and right, draw this face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, triangles);
                     }
                     //back
-                    if (isTransparent(x , y, z+1))
+                    if (isTransparent(x, y, z + 1))
                     {
                         //use up and right, draw another face
                         BuildFaces(map[x, y, z], new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, triangles);
@@ -164,11 +181,35 @@ public class Chunk : MonoBehaviour
         return false;
     }
 
-    protected virtual byte GetByte(int x,int y,int z)
+    protected virtual byte GetByte(Vector3 worldPos)
     {
-        if (x<0 ||y<0||z<0 || x>=width||y >= height || z >= width)
+        Vector3 localPos = worldPos - transform.position;
+        return GetByte( Mathf.FloorToInt( localPos.x), Mathf.FloorToInt(localPos.y), Mathf.FloorToInt(localPos.z));
+    }
+
+    protected virtual byte GetByte(int x, int y, int z)
+    {
+        if (y < 0 || y >= height)
         {
-            return 0;
+            return 0;//there will not be chunks above or below, so is empty
+        }
+        if (x<0 ||z<0 || x>=width|| z >= width)
+        {
+            Vector3 worldPos = new Vector3(x, y, z) + transform.position;
+            Chunk chunk = Chunk.FindChunk(worldPos);
+            if (chunk == this)
+            {
+                Debug.LogError("when position out of bound, it should not be the same chunk on " + new Vector3(x, y, z) + transform.position);
+                return 0;
+            }else if (chunk == null)
+            {
+                return GetTheoreticalByte(worldPos);
+            }
+            else
+            {
+                return chunk.GetByte(worldPos);
+            }
+
         }
         return map[x, y, z];
     }
