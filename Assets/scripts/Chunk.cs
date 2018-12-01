@@ -45,22 +45,40 @@ public class Chunk : MonoBehaviour
     public static byte CalculteByte(Vector3 worldPos, Vector3 offset0, Vector3 offset1, Vector3 offset2)
     {
         byte brick = 1;
-        //large scale means more steep, less fluent, 
-        //so we should make the value less important, because we want it overall to be fluent
-        //this is to add more detail to the map generated with scalel 0.007
-        //but without the map generated with scale 0.007, this will just be blobs of small island
-        float noise = CalculateNoise(worldPos, offset0, 0.05f);
-        //this means on ground this value are more prone to have value(because noise is larger when y is smaller)
-        noise /= ((float)worldPos.y / 5.0f);
-        noise = Mathf.Max(noise, CalculateNoise(worldPos, offset1, 0.02f));
-        noise /= ((float)worldPos.y / 5.0f);
-        noise = Mathf.Max(noise, CalculateNoise(worldPos, offset2, 0.007f));
-        //Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
-        //float halfHeightFloat = width / 2f;
-        //y smaller means height is smaller
-        //this makes ground solid and don't have mesh on sky
-        //noise += (halfHeightFloat - (float)y) / halfHeightFloat;
-        if (noise > 0.2f)
+
+        float heightBase = 10;//ground is solid for 10
+        float maxHeight = height  - 10;//
+        float mountainHeight = maxHeight-heightBase;
+        //Debug.Log(height+" "+ heightBase+" "+ maxHeight+" "+mountainHeight);
+        float mountainValue = CalculateNoise(worldPos, offset0, 0.009f);
+
+        mountainValue *= mountainHeight;
+        mountainValue += heightBase;
+
+        //mountainValue += CalculateNoise(worldPos, offset1, 0.02f) * 5 - 5;
+        mountainValue += CalculateNoise(worldPos, offset2, 0.05f) * 10 - 5;
+
+        ////large scale means more steep, less fluent, 
+        ////so we should make the value less important, because we want it overall to be fluent
+        ////this is to add more detail to the map generated with scalel 0.007
+        ////but without the map generated with scale 0.007, this will just be blobs of small island
+        //float noise = CalculateNoise(worldPos, offset0, 0.05f);
+        ////this means on ground this value are more prone to have value(because noise is larger when y is smaller)
+        //noise /= ((float)worldPos.y / 5.0f);
+        //noise = Mathf.Max(noise, CalculateNoise(worldPos, offset1, 0.02f));
+        //noise /= ((float)worldPos.y / 5.0f);
+        //noise = Mathf.Max(noise, CalculateNoise(worldPos, offset2, 0.007f));
+        ////Debug.Log("noise " + noiseX + " " + noiseY + " " + noiseZ+" "+noise);
+        ////float halfHeightFloat = width / 2f;
+        ////y smaller means height is smaller
+        ////this makes ground solid and don't have mesh on sky
+        ////noise += (halfHeightFloat - (float)y) / halfHeightFloat;
+        //if (noise > 0.2f)
+        //{
+        //    return brick;
+        //}
+
+        if (mountainValue >= worldPos.y)
         {
             return brick;
         }
@@ -97,7 +115,7 @@ public class Chunk : MonoBehaviour
         float noiseZ = Mathf.Abs((float)pos.z + offset.z) * scale;
         //value passed in generate should not be integer
         //value output is between -1 to 1
-        return Noise.Generate(noiseX, noiseY, noiseZ);
+        return 0.5f+Noise.Generate(noiseX, noiseY, noiseZ)*0.5f;
     }
 
     public virtual IEnumerator CreateVisualMesh()

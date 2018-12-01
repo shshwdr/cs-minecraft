@@ -349,7 +349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 30
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -411,7 +411,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkWidth: 30
-  chunkHeight: 16
+  chunkHeight: 50
   seed: 0
   chunkPrefab: {fileID: 6047393221858441872, guid: b45e3d43c6ed8cd4d9674effd506e000, type: 3}
   viewRange: 30
