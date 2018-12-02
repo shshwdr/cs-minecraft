@@ -153,37 +153,37 @@ public class Chunk : MonoBehaviour
                     if (isTransparent(x - 1, y, z))
                     {
                         //use up and forward, draw another face
-                        BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, triangles);
+                        BuildFaces(y,map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.forward, false, verts, uvs, triangles);
                     }
                     //right
                     if (isTransparent(x + 1, y, z))
                     {
                         //use up and forward, draw this face
-                        BuildFaces(map[x, y, z], new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, triangles);
+                        BuildFaces(y,map[x, y, z], new Vector3(x + 1, y, z), Vector3.up, Vector3.forward, true, verts, uvs, triangles);
                     }
                     //bottom
                     if (isTransparent(x, y - 1, z))
                     {
                         //use forward and right, draw another face
-                        BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, triangles);
+                        BuildFaces(y,map[x, y, z], new Vector3(x, y, z), Vector3.forward, Vector3.right, false, verts, uvs, triangles);
                     }
                     //up
                     if (isTransparent(x, y + 1, z))
                     {
                         //use forward and right, draw this face
-                        BuildFaces(map[x, y, z], new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, triangles);
+                        BuildFaces(y,map[x, y, z], new Vector3(x, y + 1, z), Vector3.forward, Vector3.right, true, verts, uvs, triangles);
                     }
                     //front
                     if (isTransparent(x, y, z - 1))
                     {
                         //use up and right, draw this face
-                        BuildFaces(map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, triangles);
+                        BuildFaces(y,map[x, y, z], new Vector3(x, y, z), Vector3.up, Vector3.right, true, verts, uvs, triangles);
                     }
                     //back
                     if (isTransparent(x, y, z + 1))
                     {
                         //use up and right, draw another face
-                        BuildFaces(map[x, y, z], new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, triangles);
+                        BuildFaces(y,map[x, y, z], new Vector3(x, y, z + 1), Vector3.up, Vector3.right, false, verts, uvs, triangles);
                     }
                 }
             }
@@ -245,7 +245,7 @@ public class Chunk : MonoBehaviour
         return map[x, y, z];
     }
 
-    public virtual void BuildFaces(byte brick, Vector3 corner,Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> triangles)
+    public virtual void BuildFaces(int y,byte brick, Vector3 corner,Vector3 up, Vector3 right, bool reversed, List<Vector3> verts, List<Vector2> uvs, List<int> triangles)
     {
         int index = verts.Count;
 
@@ -264,7 +264,21 @@ public class Chunk : MonoBehaviour
 
         Vector2 uvWidth = new Vector2(0.25f, 0.25f);
 
-        Vector2 uvCorner = new Vector2(0f+(brick-1)*0.25f, 0.75f);
+
+        float uvCol = (brick - 1) * 0.25f;
+
+        //a looped layer of depth of color: 0,1,2,3,2,1
+        float uvRow = y % 6;
+        if (uvRow >= 4) uvRow = 6 - uvRow;
+        uvRow /= 4f;
+        //following code just becuase brick 3 looks black and ugly in the last row.
+        if(brick == 3)
+        {
+            uvRow = 0.75f;
+        }
+
+        Vector2 uvCorner = new Vector2(uvCol, uvRow);
+
         uvs.Add(uvCorner);
         uvs.Add(new Vector2(uvCorner.x, uvCorner.y + uvWidth.y));
         uvs.Add(new Vector2(uvCorner.x+uvWidth.x, uvCorner.y + uvWidth.y));
