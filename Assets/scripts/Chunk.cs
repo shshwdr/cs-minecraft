@@ -262,22 +262,20 @@ public class Chunk : MonoBehaviour
         verts.Add(corner + up + right);
         verts.Add(corner + right);
 
-        Vector2 uvWidth = new Vector2(0.25f, 0.25f);
+        Vector2 uvWidth = new Vector2(0.125f, 0.125f);
 
 
-        float uvCol = (brick - 1) * 0.25f;
-
+        float uvCol = (brick - 1) * 0.125f;
         //a looped layer of depth of color: 0,1,2,3,2,1
         float uvRow = y % 6;
         if (uvRow >= 4) uvRow = 6 - uvRow;
         uvRow /= 4f;
-        //following code just becuase brick 3 looks black and ugly in the last row.
-        if(brick == 3)
-        {
-            uvRow = 0.75f;
-        }
-
         Vector2 uvCorner = new Vector2(uvCol, uvRow);
+        //the texture has two rows now
+        if (brick >= 8)
+        {
+            uvCorner.y += 0.125f;
+        }
 
         uvs.Add(uvCorner);
         uvs.Add(new Vector2(uvCorner.x, uvCorner.y + uvWidth.y));

@@ -585,7 +585,7 @@ MonoBehaviour:
   chunkHeight: 50
   seed: 0
   chunkPrefab: {fileID: 6047393221858441872, guid: b45e3d43c6ed8cd4d9674effd506e000, type: 3}
-  viewRange: 30
+  viewRange: 20
   brickHeight: 0.5
 --- !u!114 &985811497
 MonoBehaviour:
