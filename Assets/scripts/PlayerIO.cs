@@ -6,6 +6,7 @@ public class PlayerIO : Singleton<PlayerIO>
 {
     Camera camera;
     public float maxDistance = 5;
+    public byte selectedBrickByte = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,8 +30,17 @@ public class PlayerIO : Singleton<PlayerIO>
                 Vector3 p = hit.point;
                 //hack for brick height
                 p.y /= World.Instance.brickHeight;
-                p -= hit.normal / 4f;
-                chunk.SetBrick(0, p);
+                if (selectedBrickByte == 0)
+                {
+                    p -= hit.normal / 4f;
+                    selectedBrickByte = chunk.GetByte(p);
+                    chunk.SetBrick(0, p);
+                } else
+                {
+                    p += hit.normal / 4f;
+                    chunk.SetBrick(selectedBrickByte, p);
+                    selectedBrickByte = 0;
+                }
                 Debug.Log(chunk.GetByte(p)+" byte on "+hit.transform.name);
             }
             else
