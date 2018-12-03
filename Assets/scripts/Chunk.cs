@@ -212,7 +212,7 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    protected virtual byte GetByte(Vector3 worldPos)
+    public virtual byte GetByte(Vector3 worldPos)
     {
         Vector3 localPos = worldPos - transform.position;
         return GetByte( Mathf.FloorToInt( localPos.x), Mathf.FloorToInt(localPos.y), Mathf.FloorToInt(localPos.z));
@@ -330,5 +330,48 @@ public class Chunk : MonoBehaviour
         }
 
         return null;
+    }
+
+    public bool SetBrick(byte brick, Vector3 worldPos)
+    {
+        Vector3 localPos = worldPos - transform.position;
+        return SetBrick(brick, Mathf.FloorToInt( localPos.x), Mathf.FloorToInt(localPos.y),Mathf.FloorToInt(localPos.z));
+    }
+    public bool SetBrick(byte brick, int x,int y,int z) 
+    {
+        if (x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= width)
+        {
+            Debug.LogError("click on a position that should not be able to be clicked " + new Vector3(x, y, z));
+            return false;
+        }
+        if(map[x,y,z] == brick)
+        {
+            //same brick, no need to recalculate
+            return false;
+        }
+        map[x, y, z] = brick;
+        StartCoroutine(CreateVisualMesh());
+
+        UpdateNeighborChunk(x, 0, new Vector3(x - 2, y, z));
+        UpdateNeighborChunk(x, width-1, new Vector3(x + 2, y, z));
+        UpdateNeighborChunk(y, 0, new Vector3(x, y-2, z));
+        UpdateNeighborChunk(y, height-1, new Vector3(x, y+2, z));
+        UpdateNeighborChunk(z, 0, new Vector3(x, y, z-2));
+        UpdateNeighborChunk(z, width - 1, new Vector3(x, y, z+2));
+
+        return true;
+    }
+
+    protected virtual void UpdateNeighborChunk(int compare1,int compare2, Vector3 vec)
+    {
+        if (compare1 == compare2)
+        {
+            //on the edge, also need to recalculate another chunk connect to it
+            Chunk chunk = FindChunk(vec + transform.position);
+            if (chunk)
+            {
+                StartCoroutine(chunk.CreateVisualMesh());
+            }
+        }
     }
 }
