@@ -48,31 +48,37 @@ public class Chunk : MonoBehaviour
 
     public static byte CalculteByte(Vector3 worldPos, Vector3 offset0, Vector3 offset1, Vector3 offset2)
     {
-        byte brick = 1;
+        float biomeValue = CalculateNoise(worldPos, offset1, 0.02f);
+        int biomeIndex = Mathf.FloorToInt(biomeValue * World.Instance.biomes.Length);
+        Biome biome = World.Instance.biomes[biomeIndex];
 
-        float heightBase = 10;//ground is solid for 10
-        float maxHeight = height  - 10;//
-        float mountainHeight = maxHeight-heightBase;
+        float heightBase = biome.minHeight;
+        float maxHeight = biome.maxHeight;
+        float mountainHeight = maxHeight - heightBase;
+        
         //Debug.Log(height+" "+ heightBase+" "+ maxHeight+" "+mountainHeight);
         float mountainValue = CalculateNoise(worldPos, offset0, 0.009f);
         float smallMountainValue = CalculateNoise(worldPos, offset2, 0.05f);
-        float clusterValue = CalculateNoise(worldPos, offset1, 0.02f);
-        if (mountainValue ==0f && smallMountainValue < 0.2f) 
-        {
-            //ground
-            brick = 3;
-        }else if(clusterValue > 0.9f){
-            brick = 4;
-        }else if (clusterValue > 0.8f)
-        {
-            brick = 2;
-        }
+
+        //mountainValue += biome.mountainPowerBonus;
+        //if (mountainValue < 0)
+        //{
+        //    mountainValue = 0;
+        //}
+        //mountainValue = Mathf.Pow(mountainValue, biome.mountainPower);
+
+
+        byte brick = biome.GetBrick(Mathf.FloorToInt(worldPos.y), mountainValue, smallMountainValue, null);
+
         mountainValue *= mountainHeight;
         
         mountainValue += heightBase;
 
         //mountainValue += CalculateNoise(worldPos, offset1, 0.02f) * 5 - 5;
         mountainValue += smallMountainValue * 10 - 5;
+
+
+
         ////large scale means more steep, less fluent, 
         ////so we should make the value less important, because we want it overall to be fluent
         ////this is to add more detail to the map generated with scalel 0.007
@@ -265,14 +271,14 @@ public class Chunk : MonoBehaviour
         Vector2 uvWidth = new Vector2(0.125f, 0.125f);
 
 
-        float uvCol = (brick - 1) * 0.125f;
+        float uvCol = ((brick - 1)%8) * 0.125f;
         //a looped layer of depth of color: 0,1,2,3,2,1
         float uvRow = y % 6;
         if (uvRow >= 4) uvRow = 6 - uvRow;
         uvRow /= 4f;
         Vector2 uvCorner = new Vector2(uvCol, uvRow);
         //the texture has two rows now
-        if (brick >= 8)
+        if (brick <= 8)
         {
             uvCorner.y += 0.125f;
         }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class World : Singleton<World>
 {
+    public Biome[] biomes;
     public int chunkWidth = 16;
     public int chunkHeight = 16;
     public int seed = 0;
