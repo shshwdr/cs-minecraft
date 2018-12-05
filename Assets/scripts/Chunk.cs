@@ -8,6 +8,7 @@ using SimplexNoise;
 [RequireComponent(typeof(MeshCollider))]
 public class Chunk : MonoBehaviour
 {
+    public static List<Chunk> chunksWaitToInit = new List<Chunk>();
     public static List<Chunk> chunks = new List<Chunk>();
     public static int width
     {
@@ -26,6 +27,7 @@ public class Chunk : MonoBehaviour
     protected MeshRenderer meshRenderer;
     protected MeshCollider meshCollider;
     protected MeshFilter meshFilter;
+    protected bool initialized = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,8 +35,11 @@ public class Chunk : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
         meshFilter = GetComponent<MeshFilter>();
-        CalculateMap();
-        StartCoroutine(CreateVisualMesh());
+        chunksWaitToInit.Add(this);
+        if(chunksWaitToInit[0] == this)
+        {
+            StartCoroutine(CalculateMap());
+        }
     }
 
     public static byte GetTheoreticalByte(Vector3 worldPos)
@@ -60,12 +65,12 @@ public class Chunk : MonoBehaviour
         float mountainValue = CalculateNoise(worldPos, offset0, 0.009f);
         float smallMountainValue = CalculateNoise(worldPos, offset2, 0.05f);
 
-        //mountainValue += biome.mountainPowerBonus;
-        //if (mountainValue < 0)
-        //{
-        //    mountainValue = 0;
-        //}
-        //mountainValue = Mathf.Pow(mountainValue, biome.mountainPower);
+        mountainValue += biome.mountainPowerBonus;
+        if (mountainValue < 0)
+        {
+            mountainValue = 0;
+        }
+        mountainValue = Mathf.Pow(mountainValue, biome.mountainPower);
 
 
         byte brick = biome.GetBrick(Mathf.FloorToInt(worldPos.y), mountainValue, smallMountainValue, null);
@@ -105,7 +110,7 @@ public class Chunk : MonoBehaviour
         return 0;
     }
 
-    public virtual void CalculateMap()
+    public virtual IEnumerator CalculateMap()
     {
         map = new byte[width, height, width];
 
@@ -126,6 +131,16 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
+        StartCoroutine( CreateVisualMesh());
+        initialized = true;
+        yield return 0;
+
+        chunksWaitToInit.Remove(this);
+        if (chunksWaitToInit.Count >0)
+        {
+            StartCoroutine(chunksWaitToInit[0]. CalculateMap());
+        }
+
     }
 
     public static float CalculateNoise(Vector3 pos, Vector3 offset, float scale)
@@ -230,9 +245,14 @@ public class Chunk : MonoBehaviour
         {
             return 0;//there will not be chunks above or below, so is empty
         }
+
+        Vector3 worldPos = new Vector3(x, y, z) + transform.position;
+        if (!initialized)
+        {
+            return GetTheoreticalByte(worldPos);
+        }
         if (x<0 ||z<0 || x>=width|| z >= width)
         {
-            Vector3 worldPos = new Vector3(x, y, z) + transform.position;
             Chunk chunk = Chunk.FindChunk(worldPos);
             if (chunk == this)
             {

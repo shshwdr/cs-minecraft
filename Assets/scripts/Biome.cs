@@ -43,6 +43,7 @@ public class Biome
     //so when we in this biome and y < 10, (water bid = 1)> (dirt bid = 0.5), so will show water
     //when y >=10 (dirt layer = 1 or 0.5)>(water bit = 0), so will show dirt
     //so easy to make mistakes..
+    
     public BrickLayer[] brickLayers;
     public byte GetBrick(int y, float mountainValue, float blobValue, Chunk chunk)
     {

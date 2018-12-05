@@ -592,11 +592,11 @@ MonoBehaviour:
     - name: dirt
       brickType: 6
       weight: 0.5
-      conditions: 0300000002000000
+      conditions: 0100000002000000
     - name: 
       brickType: 14
       weight: 1
-      conditions: 01000000
+      conditions: 03000000
   - name: PaintedDesert
     desc: "\t\t"
     mountainPower: 0.5
@@ -606,12 +606,12 @@ MonoBehaviour:
     brickLayers:
     - name: 
       brickType: 12
-      weight: 1
-      conditions: 0200000003000000
+      weight: 0.5
+      conditions: 03000000
     - name: 
       brickType: 5
       weight: 1
-      conditions: 01000000
+      conditions: 0100000002000000
   chunkWidth: 30
   chunkHeight: 50
   seed: 0
