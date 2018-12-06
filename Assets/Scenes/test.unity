@@ -562,6 +562,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FPSController
       objectReference: {fileID: 0}
+    - target: {fileID: 5400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
+      propertyPath: m_UseGravity
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
 --- !u!1 &985811491 stripped
@@ -612,11 +616,11 @@ MonoBehaviour:
       brickType: 5
       weight: 1
       conditions: 0100000002000000
-  chunkWidth: 30
+  chunkWidth: 20
   chunkHeight: 50
   seed: 0
   chunkPrefab: {fileID: 6047393221858441872, guid: b45e3d43c6ed8cd4d9674effd506e000, type: 3}
-  viewRange: 20
+  viewRange: 30
   brickHeight: 0.5
 --- !u!114 &985811497
 MonoBehaviour:

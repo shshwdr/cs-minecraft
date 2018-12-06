@@ -23,32 +23,69 @@ public class World : Singleton<World>
     // Update is called once per frame
     void Update()
     {
-        for (float x = transform.position.x - viewRange;x < transform.position.x + viewRange; x+=chunkWidth)
+        int incase = 0;
+        for (int multix = 0; viewRange > multix * chunkWidth; multix++)
         {
-            //don't worry about y for now
-            //for (float y = transform.position.y - viewRange; y < transform.position.y + viewRange; y++)
+            incase++;
+            if (incase > 500)
             {
-                for (float z = transform.position.z - viewRange; z < transform.position.z + viewRange; z+=chunkWidth)
+                Debug.LogError("woops");
+                return;
+            }
+            for (int multiz = 0; viewRange > multiz * chunkWidth; multiz++)
+            {
+                incase++;
+                if (incase > 500)
                 {
-                    if (Chunk.chunks.Count >= 200)
+                    Debug.LogError("woops");
+                    return;
+                }
+                
+                for (int ix = -multix; ix <= multix; ix += 2* multix)
+                {
+                    incase++;
+                    if (incase > 500)
                     {
-                        Debug.LogError("too many chunks");
-                        continue;
+                        Debug.LogError("woops");
+                        return;
                     }
-                    Vector3 pos = new Vector3(x, 0, z);
-                    pos.x = Mathf.Floor(pos.x / (float)chunkWidth) * chunkWidth;
-                    pos.z = Mathf.Floor(pos.z / (float)chunkWidth) * chunkWidth;
-                    //Debug.Log("pos " + pos);
-                    Chunk chunk = Chunk.FindChunk(pos);
-                    if (chunk != null)
+                    for (int iz = -multiz; iz <= multiz; iz += 2* multiz)
                     {
-                        continue;
+                        incase++;
+                        if (incase > 500)
+                        {
+                            Debug.LogError(ix+"woops"+iz+" "+ multiz+" "+ multix);
+                            return;
+                        }
+                        float x = transform.position.x + ix*chunkWidth;
+                        float z = transform.position.z + iz * chunkWidth;
+                        if (Chunk.chunks.Count >= 100)
+                        {
+                            Debug.LogError("too many chunks");
+                            continue;
+                        }
+                        Vector3 pos = new Vector3(x, 0, z);
+                        pos.x = Mathf.Floor(pos.x / (float)chunkWidth) * chunkWidth;
+                        pos.z = Mathf.Floor(pos.z / (float)chunkWidth) * chunkWidth;
+                        //Debug.Log("pos " + pos);
+                        Chunk chunk = Chunk.FindChunk(pos);
+                        if (chunk == null)
+                        {
+                            //chunk will add into chunks in its start
+                            chunk = Instantiate(chunkPrefab, pos, Quaternion.identity) as Chunk;
+                        }
+                        if(iz == 0)
+                        {
+                            break;
+                        }
                     }
-                    //chunk will add into chunks in its start
-                    chunk = Instantiate(chunkPrefab, pos, Quaternion.identity) as Chunk;
-                    
+                    if (ix == 0)
+                    {
+                        break;
+                    }
                 }
             }
         }
+        
     }
 }

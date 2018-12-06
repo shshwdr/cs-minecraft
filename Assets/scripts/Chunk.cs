@@ -119,17 +119,18 @@ public class Chunk : MonoBehaviour
         Vector3 offset1 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
         Vector3 offset2 = new Vector3(Random.value * 10000, Random.value * 10000, Random.value * 10000);
 
-
-        for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
         {
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
             {
+            
                 for (int z = 0; z < width; z++)
                 {
 
                     map[x, y, z] = CalculteByte(new Vector3(x, y, z)+transform.position, offset0, offset1, offset2);
                 }
             }
+            yield return 0;
         }
         StartCoroutine( CreateVisualMesh());
         initialized = true;
