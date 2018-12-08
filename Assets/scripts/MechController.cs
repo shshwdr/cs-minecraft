@@ -25,6 +25,14 @@ public class MechController : MonoBehaviour
         rigidbody.velocity += (vert * transform.forward + horz * transform.right) * Time.deltaTime * speed;
 
         animator.SetFloat("Forward", vert);
+
+        //this move should happen after camera rotate in MouseLook, otherwise it might get jitter
+        Vector3 idealPos = transform.position + Vector3.up * 6 - Camera.main.transform.forward * 10;
+        Camera.main.transform.position = idealPos;
+        Vector3 idealForward = Camera.main.transform.forward;
+        idealForward.y = 0;
+        idealForward.Normalize();
+        transform.rotation = Quaternion.LookRotation(idealForward);
     }
     private void FixedUpdate()
     {
