@@ -755,6 +755,12 @@ MonoBehaviour:
     smooth: 0
     smoothTime: 5
     lockCursor: 1
+  animator: {fileID: 972703990}
+--- !u!95 &972703990 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9500000, guid: 7669b302658a09c4fa0f4b98f747bd59, type: 3}
+  m_PrefabInstance: {fileID: 1304036286}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &985811490
 PrefabInstance:
   m_ObjectHideFlags: 0

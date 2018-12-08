@@ -8,6 +8,7 @@ public class MechController : MonoBehaviour
     public float speed = 10;
     Rigidbody rigidbody;
     [SerializeField] private MouseLook m_MouseLook;
+    public Animator animator;
     // Start is called before the first frame update
     void Start()
     {
@@ -22,6 +23,8 @@ public class MechController : MonoBehaviour
         float horz = Input.GetAxis("Horizontal");
         float vert = Input.GetAxis("Vertical");
         rigidbody.velocity += (vert * transform.forward + horz * transform.right) * Time.deltaTime * speed;
+
+        animator.SetFloat("Forward", vert);
     }
     private void FixedUpdate()
     {

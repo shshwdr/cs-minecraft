@@ -26,6 +26,7 @@ public class PlayerIO : Singleton<PlayerIO>
                 if (!chunk)
                 {
                     Debug.LogError("we hit something that is not a chunk: " + hit.transform.name);
+                    return;
                 }
                 Vector3 p = hit.point;
                 //hack for brick height
